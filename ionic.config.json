@@ -1,6 +1,6 @@
 {
   "name": "PodGoo",
-  "app_id": "",
+  "app_id": "com.alexbailey.podgoo",
   "type": "ionic-angular",
   "integrations": {
     "cordova": {}

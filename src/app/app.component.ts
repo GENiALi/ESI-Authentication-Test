@@ -3,7 +3,16 @@ import { Nav, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
+import { ErrorReportingProvider } from '../providers/error-reporting/error-reporting';
+
+// Deeplinks for authorisation callback url...
+import { Deeplinks } from '@ionic-native/deeplinks';
+
+// Custom auth provider
+import { EveAuthProvider } from '../providers/eve-auth/eve-auth';
+
 import { HomePage } from '../pages/home/home';
+import { FleetManagementPage } from '../pages/fleet-management/fleet-management';
 import { ListPage } from '../pages/list/list';
 
 @Component({
@@ -16,15 +25,26 @@ export class MyApp {
 
   pages: Array<{title: string, component: any}>;
 
-  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen, private deeplinks: Deeplinks, private errorReport: ErrorReportingProvider, private eveAuth: EveAuthProvider) {
     this.initializeApp();
 
     // used for an example of ngFor and navigation
     this.pages = [
       { title: 'Home', component: HomePage },
-      { title: 'List', component: ListPage }
+      { title: 'Fleets', component:  FleetManagementPage }
     ];
 
+  }
+
+  ngAfterViewInit() {
+    this.deeplinks.route({
+      '/': HomePage
+    }).subscribe((match) => {
+      this.errorReport.logSuccess('Retrieved auth code from browser! ' + match.$args.code);
+      this.eveAuth.authExchangeAuthCode(match.$args.code);
+    }, (nomatch) => {
+      this.errorReport.logError('Got a deeplink that didnt match!' + nomatch);
+    });
   }
 
   initializeApp() {
